@@ -6,30 +6,26 @@ The aim is to be minimal, and headless mode is required since there is no X inst
 
 ## Quickstart
 
-First clone the repo and build the container:
+Using the prebuilt image:
 
 ```
-git clone https://github.com/scottyeager/python-selenium-docker.git
-cd python-selenium-docker
-docker buildx build -t selenium-python .
+docker run -it ghcr.io/scottyeager/python-selenium-docker:main python
 ```
 
-Now start up a copy of the container interactively:
+Import Selenium and add options (`--no-sandbox` is needed since we are root inside the container):
 
 ```
-docker run -it selenium-python:latest
-```
-
-Then start Python inside the container and fetch a page with Selenium. Note that the `chromium` and `chromedriver` executables will be downloaded automatically by Selenium Manager on the first execution of `webdriver.Chrome()`. This can take a few minutes.
-
-```
-python
-
 from selenium import webdriver
 options = webdriver.ChromeOptions()
 options.add_argument("--no-sandbox")
 options.add_argument("--headless=new")
+```
 
+Finally start up the driver and fetch a page.
+
+Note that the `chromium` and `chromedriver` executables will be downloaded automatically by Selenium Manager on the first execution of `webdriver.Chrome()`. This can take a minute or two.
+
+```
 driver = webdriver.Chrome(options=options)
 driver.get('https://example.com')
 driver.title
@@ -38,11 +34,40 @@ driver.title
 There's a convenience script included the does the above with a couple extra imports that are typically recommended and javascript enabled. So you can:
 
 ```
-python -i /root/headless.py
+docker run -it ghcr.io/scottyeager/python-selenium-docker:main python -i /headless.py
 ```
 
-and `driver` will be setup for you.
+Then `driver` will be available automatically after the downloads finish.
 
+## Committing the binaries
+
+If you want to save a version of the binaries for reuse, just commit a new Docker image after the step is complete:
+
+```
+docker run ghcr.io/scottyeager/python-selenium-docker:main python /headless.py
+```
+
+The container will exit when it's finished. Then commit it (tag shown is just an example):
+
+```
+docker commit $(docker ps -aq | head -n 1) python-selenium:bins
+```
+
+After that, you can now start a fresh container with binaries included like this:
+
+```
+docker run -it python-selenium:bins
+```
+
+## Development
+
+If you want to experiment locally, just:
+
+```
+git clone https://github.com/scottyeager/python-selenium-docker.git
+cd python-selenium-docker
+docker buildx build -t selenium-python .
+```
 
 ## Motivation
 

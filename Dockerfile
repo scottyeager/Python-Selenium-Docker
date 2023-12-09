@@ -24,4 +24,4 @@ RUN pip install selenium
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-COPY headless.py /root/headless.py
+COPY headless.py /headless.py
